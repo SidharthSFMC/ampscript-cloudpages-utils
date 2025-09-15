@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Unsubscribe</title>
+
+  <style>
+    :root {
+      --sf-blue-1: #1589ee;
+      --sf-blue-2: #0b74d1;
+      --muted: #6b7c93;
+      --bg: #f6fbff;
+      --card-bg: #ffffff;
+      --success: #1aa260;
+      --radius: 12px;
+      --shadow: 0 8px 28px rgba(11, 29, 50, 0.08);
+      font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(180deg, var(--bg), #ffffff 60%);
+      margin: 0;
+      padding: 0;
+      color: #102a43;
+    }
+
+    .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-width: 600px;
+      width: 100%;
+      padding: 32px;
+      text-align: center;
+    }
+
+    .icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 16px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 0 0 8px;
+      color: #06233a;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 15px;
+      margin: 0 0 20px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, var(--sf-blue-1), var(--sf-blue-2));
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: white;
+    }
+  </style>
+%%[
+/*this code is to update the subscriber status to unsubscribe */
+SET @subscriberkey=AttributeValue("_subscriberkey")
+SET @status="Unsubscribed"
+SET @emailAddress=AttributeValue("emailaddr")
+
+
+/*Get the subaccount business unit MID*/
+SET @businessunit_MID=AuthenticatedMemberID()
+
+
+
+
+/*Create a subscriber object */
+
+SET @subscriber = CreateObject("Subscriber")
+/*Now Define the value of a property of a Subscriber API Object*/
+SetObjectProperty(@subscriber,"Status",@status) /*Status is provided */
+SetObjectProperty(@subscriber,"SubscriberKey",@subscriberkey) /*Ensure SubscriberKey is there*/
+
+/* Create a ClientId Object */
+SET @clientID= CreateObject("ClientID")
+/*Now define the value of a property of clientid object */
+SetObjectProperty(@clientID,"ID",@businessunit_MID)
+SetObjectProperty(@clientID,"IDSpecified","true")
+SetObjectProperty(@subscriber,"Client",@clientID)
+
+
+/*Now Create a Save Object and the use it in Options */
+SET @updateOptions = CreateObject("UpdateOptions")
+SET @saveOptions=CreateObject("SaveOption")
+SetObjectProperty(@saveOptions,"SaveAction","UpdateAdd")
+SetObjectProperty(@saveOptions,"PropertyName","*")
+AddObjectArrayItem(@updateOptions,"SaveOptions",@saveOptions)
+
+
+/*Update the Subscriber status with new status*/
+set @subscribersStatus=InvokeUpdate(@subscriber,@update_sub_status, @update_sub_errorcode,@updateOptions)
+]%%
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="card">
+      <!-- SVG cloud/check icon -->
+      <svg class="icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="30" fill="url(#grad)" />
+        <path d="M22 33l6 6 14-14" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#1589ee"/>
+            <stop offset="1" stop-color="#0b74d1"/>
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <h1>Unsubscribe</h1>
+      <p>We’re sorry to see you go. Click below to unsubscribe from our emails.</p>
+
+    </div>
+  </div>
+
+</body>
+</html>
